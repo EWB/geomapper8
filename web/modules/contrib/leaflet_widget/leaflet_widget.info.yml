@@ -1,0 +1,14 @@
+name: Leaflet Widget
+type: module
+description: Provides a leaflet map widget for geofields.
+# core: 8.x
+package: Leaflet
+dependencies:
+  - geofield
+  - leaflet
+
+# Information added by Drupal.org packaging script on 2019-01-06
+version: '8.x-1.0-alpha1'
+core: '8.x'
+project: 'leaflet_widget'
+datestamp: 1546801089
