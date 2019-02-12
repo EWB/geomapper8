@@ -4,7 +4,7 @@ namespace Drupal\leaflet_views\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Core\Render\HtmlResponse;;
+use Drupal\Core\Render\HtmlResponse;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -30,7 +30,7 @@ class LeafletAjaxPopupController extends ControllerBase {
   protected $renderer;
 
   /**
-   * Constructs a new MigrationController object.
+   * Constructs a new LeafletAjaxPopupController object.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_manager
    *   The entity manager.

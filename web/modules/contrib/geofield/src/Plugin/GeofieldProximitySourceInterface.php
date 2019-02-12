@@ -7,7 +7,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\views\Plugin\views\HandlerBase;
 
 /**
- * Defines an interface for Geofield Proximity plugins.
+ * Defines an interface for Geofield Proximity Source plugins.
  */
 interface GeofieldProximitySourceInterface extends PluginInspectionInterface {
 

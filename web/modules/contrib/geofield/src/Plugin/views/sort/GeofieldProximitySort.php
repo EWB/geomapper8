@@ -27,6 +27,13 @@ class GeofieldProximitySort extends SortPluginBase {
   protected $proximitySourceManager;
 
   /**
+   * The Geofield Proximity Source Plugin.
+   *
+   * @var \Drupal\geofield\Plugin\GeofieldProximitySourceInterface
+   */
+  protected $sourcePlugin;
+
+  /**
    * {@inheritdoc}
    */
   protected function defineOptions() {
@@ -81,22 +88,26 @@ class GeofieldProximitySort extends SortPluginBase {
    * {@inheritdoc}
    */
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
-    $view_context = $this->pluginDefinition['plugin_type'];
+
+    $context = $this->pluginDefinition['plugin_type'];
 
     $user_input = $form_state->getUserInput();
     $source_plugin_id = isset($user_input['options']['source']) ? $user_input['options']['source'] : $this->options['source'];
     $source_plugin_configuration = isset($user_input['options']['source_configuration']) ? $user_input['options']['source_configuration'] : $this->options['source_configuration'];
 
-    $this->proximitySourceManager->buildCommonFormElements($form, $form_state, $view_context);
+    $this->proximitySourceManager->buildCommonFormElements($form, $form_state, $context);
 
     $form['units']['#default_value'] = $this->options['units'];
     $form['source']['#default_value'] = $this->options['source'];
 
     try {
-      /** @var \Drupal\geofield\Plugin\GeofieldProximitySourceInterface $source_plugin */
-      $source_plugin = $this->proximitySourceManager->createInstance($source_plugin_id, $source_plugin_configuration);
-      $source_plugin->setViewHandler($this);
-      $source_plugin->buildOptionsForm($form['source_configuration'], $form_state, ['source_configuration']);
+      $this->sourcePlugin = $this->proximitySourceManager->createInstance($source_plugin_id, $source_plugin_configuration);
+      $this->sourcePlugin->setViewHandler($this);
+      $form['source_configuration']['origin_description'] = [
+        '#markup' => $this->sourcePlugin->getPluginDefinition()['description'],
+        '#weight' => -10,
+      ];
+      $this->sourcePlugin->buildOptionsForm($form['source_configuration'], $form_state, ['source_configuration']);
     }
     catch (\Exception $e) {
       watchdog_exception('geofield', $e);
@@ -111,10 +122,7 @@ class GeofieldProximitySort extends SortPluginBase {
   public function validateOptionsForm(&$form, FormStateInterface $form_state) {
     parent::validateOptionsForm($form, $form_state);
     try {
-      /** @var \Drupal\geofield\Plugin\GeofieldProximitySourceInterface $instance */
-      $instance = $this->proximitySourceManager->createInstance($form_state->getValue('options')['source']);
-      $instance->setViewHandler($this);
-      $instance->validateOptionsForm($form['source_configuration'], $form_state, ['source_configuration']);
+      $this->sourcePlugin->validateOptionsForm($form['source_configuration'], $form_state, ['source_configuration']);
     }
     catch (\Exception $e) {
       watchdog_exception('geofield', $e);

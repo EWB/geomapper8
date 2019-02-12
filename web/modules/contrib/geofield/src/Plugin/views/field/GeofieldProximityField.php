@@ -3,7 +3,6 @@
 namespace Drupal\geofield\Plugin\views\field;
 
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\geofield\Exception\ProximityUnavailableException;
 use Drupal\geofield\Plugin\views\GeofieldProximityHandlerTrait;
 use Drupal\views\Plugin\views\field\NumericField;
 use Drupal\views\ResultRow;
@@ -27,6 +26,13 @@ class GeofieldProximityField extends NumericField {
    * @var \Drupal\geofield\Plugin\GeofieldProximitySourceManager
    */
   protected $proximitySourceManager;
+
+  /**
+   * The Geofield Proximity Source Plugin.
+   *
+   * @var \Drupal\geofield\Plugin\GeofieldProximitySourceInterface
+   */
+  protected $sourcePlugin;
 
   /**
    * {@inheritdoc}
@@ -89,10 +95,13 @@ class GeofieldProximityField extends NumericField {
     $form['source']['#default_value'] = $this->options['source'];
 
     try {
-      /** @var \Drupal\geofield\Plugin\GeofieldProximitySourceInterface $source_plugin */
-      $source_plugin = $this->proximitySourceManager->createInstance($source_plugin_id, $source_plugin_configuration);
-      $source_plugin->setViewHandler($this);
-      $source_plugin->buildOptionsForm($form['source_configuration'], $form_state, ['source_configuration']);
+      $this->sourcePlugin = $this->proximitySourceManager->createInstance($source_plugin_id, $source_plugin_configuration);
+      $this->sourcePlugin->setViewHandler($this);
+      $form['source_configuration']['origin_description'] = [
+        '#markup' => $this->sourcePlugin->getPluginDefinition()['description'],
+        '#weight' => -10,
+      ];
+      $this->sourcePlugin->buildOptionsForm($form['source_configuration'], $form_state, ['source_configuration']);
     }
     catch (\Exception $e) {
       watchdog_exception('geofield', $e);
@@ -107,10 +116,8 @@ class GeofieldProximityField extends NumericField {
   public function validateOptionsForm(&$form, FormStateInterface $form_state) {
     parent::validateOptionsForm($form, $form_state);
     try {
-      /** @var \Drupal\geofield\Plugin\GeofieldProximitySourceInterface $instance */
-      $instance = $this->proximitySourceManager->createInstance($form_state->getValue('options')['source']);
-      $instance->setViewHandler($this);
-      $instance->validateOptionsForm($form['source_configuration'], $form_state, ['source_configuration']);
+
+      $this->sourcePlugin->validateOptionsForm($form['source_configuration'], $form_state, ['source_configuration']);
     }
     catch (\Exception $e) {
       watchdog_exception('geofield', $e);
@@ -126,11 +133,10 @@ class GeofieldProximityField extends NumericField {
   public function getValue(ResultRow $values, $field = NULL) {
 
     try {
-      /** @var \Drupal\geofield\Plugin\GeofieldProximitySourceInterface $source_plugin */
-      $source_plugin = $this->proximitySourceManager->createInstance($this->options['source'], $this->options['source_configuration']);
-      $source_plugin->setViewHandler($this);
-      $source_plugin->setUnits($this->options['units']);
-      return $source_plugin->getProximity($values->{$this->aliases['latitude']}, $values->{$this->aliases['longitude']});
+      $this->sourcePlugin = $this->proximitySourceManager->createInstance($this->options['source'], $this->options['source_configuration']);
+      $this->sourcePlugin->setViewHandler($this);
+      $this->sourcePlugin->setUnits($this->options['units']);
+      return $this->sourcePlugin->getProximity($values->{$this->aliases['latitude']}, $values->{$this->aliases['longitude']});
     }
     catch (\Exception $e) {
       watchdog_exception('geofield', $e);

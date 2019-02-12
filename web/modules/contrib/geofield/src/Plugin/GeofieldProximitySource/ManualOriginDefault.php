@@ -4,7 +4,6 @@ namespace Drupal\geofield\Plugin\GeofieldProximitySource;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\geofield\Plugin\GeofieldProximitySourceBase;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Component\Render\FormattableMarkup;
 
 /**
@@ -21,13 +20,6 @@ use Drupal\Component\Render\FormattableMarkup;
  * )
  */
 class ManualOriginDefault extends GeofieldProximitySourceBase {
-
-  /**
-   * The origin point to measure proximity from.
-   *
-   * @var array
-   */
-  protected $origin;
 
   /**
    * Constructs a ManualOriginDefault object.
@@ -47,18 +39,6 @@ class ManualOriginDefault extends GeofieldProximitySourceBase {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->origin['lat'] = isset($configuration['origin']) && is_numeric($configuration['origin']['lat']) ? $configuration['origin']['lat'] : '';
     $this->origin['lon'] = isset($configuration['origin']) && is_numeric($configuration['origin']['lon']) ? $configuration['origin']['lon'] : '';
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    return new static (
-      $configuration,
-      $plugin_id,
-      $plugin_definition,
-      $container->get('renderer')
-    );
   }
 
   /**

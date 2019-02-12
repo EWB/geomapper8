@@ -160,9 +160,10 @@ class LeafletDefaultFormatter extends FormatterBase implements ContainerFactoryP
       ],
       'icon' => [
         'iconUrl' => '',
-        'shadowUrl' => '',
         'iconSize' => ['x' => NULL, 'y' => NULL],
         'iconAnchor' => ['x' => NULL, 'y' => NULL],
+        'shadowUrl' => '',
+        'shadowSize' => ['x' => NULL, 'y' => NULL],
         'shadowAnchor' => ['x' => NULL, 'y' => NULL],
         'popupAnchor' => ['x' => NULL, 'y' => NULL],
       ],

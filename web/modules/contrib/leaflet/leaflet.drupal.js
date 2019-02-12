@@ -1,4 +1,4 @@
-(function ($) {
+(function ($, Drupal, drupalSettings) {
 
   Drupal.behaviors.leaflet = {
     attach: function (context, settings) {
@@ -256,19 +256,19 @@
     if (options.iconSize) {
       icon.options.iconSize = new L.Point(parseInt(options.iconSize.x), parseInt(options.iconSize.y));
     }
-    if (options.iconAnchor) {
+    if (options.iconAnchor && options.iconAnchor.x && options.iconAnchor.y) {
       icon.options.iconAnchor = new L.Point(parseFloat(options.iconAnchor.x), parseFloat(options.iconAnchor.y));
     }
-    if (options.popupAnchor) {
-      icon.options.popupAnchor = new L.Point(parseFloat(options.popupAnchor.x), parseFloat(options.popupAnchor.y));
+    if (options.popupAnchor && options.popupAnchor.x && options.popupAnchor.y) {
+      icon.options.popupAnchor = new L.Point(parseInt(options.popupAnchor.x), parseInt(options.popupAnchor.y));
     }
-    if (options.shadowUrl !== undefined) {
+    if (options.shadowUrl) {
       icon.options.shadowUrl = options.shadowUrl;
     }
-    if (options.shadowSize) {
+    if (options.shadowSize && options.shadowSize.x && options.shadowSize.y) {
       icon.options.shadowSize = new L.Point(parseInt(options.shadowSize.x), parseInt(options.shadowSize.y));
     }
-    if (options.shadowAnchor) {
+    if (options.shadowAnchor && options.shadowAnchor.x && options.shadowAnchor.y) {
       icon.options.shadowAnchor = new L.Point(parseInt(options.shadowAnchor.x), parseInt(options.shadowAnchor.y));
     }
     if (options.className) {
@@ -279,6 +279,7 @@
   };
 
   Drupal.Leaflet.prototype.create_point = function (marker) {
+    var self = this;
     var latLng = new L.LatLng(marker.lat, marker.lon);
     this.bounds.push(latLng);
     var lMarker;
@@ -291,13 +292,35 @@
       options.alt = marker.alt;
     }
 
+    function checkImage(imageSrc, setIcon, logError) {
+      var img = new Image();
+      img.src = imageSrc;
+      img.onload = setIcon;
+      img.onerror = logError;
+    }
+
+    lMarker = new L.Marker(latLng, options);
+
     if (marker.icon) {
-      options.icon = this.create_icon(marker.icon);
-      lMarker = new L.Marker(latLng, options);
+      checkImage(marker.icon.iconUrl,
+        // Success loading image.
+        function(){
+          marker.icon.iconSize.x = marker.icon.iconSize.x || this.naturalWidth;
+          marker.icon.iconSize.y = marker.icon.iconSize.y || this.naturalHeight;
+          if (marker.icon.shadowUrl) {
+            marker.icon.shadowSize = marker.icon.shadowSize || {};
+            marker.icon.shadowSize.x = marker.icon.shadowSize.x || this.naturalWidth;
+            marker.icon.shadowSize.y = marker.icon.shadowSize.y || this.naturalHeight;
+          }
+          options.icon = self.create_icon(marker.icon);
+          lMarker.setIcon(options.icon);
+        },
+        // Error loading image.
+        function(err){
+          console.log("Leaflet: The Icon Image doesn't exist at the requested path: " + marker.icon.iconUrl);
+        });
     }
-    else {
-      lMarker = new L.Marker(latLng, options);
-    }
+
     return lMarker;
   };
 
@@ -403,4 +426,4 @@
     }
   };
 
-})(jQuery);
+})(jQuery, Drupal, drupalSettings);

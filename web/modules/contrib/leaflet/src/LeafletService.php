@@ -276,13 +276,11 @@ class LeafletService {
    */
   public function preProcessMapSettings(array &$map_settings) {
     // Generate correct Absolute iconUrl & shadowUrl, if not external.
-    if (!empty($map_settings['icon']['iconUrl']) && !UrlHelper::isExternal($map_settings['icon']['iconUrl']) && strpos($map_settings['icon']['iconUrl'], '{{') === FALSE) {
-      $map_settings['icon']['iconUrl'] = Url::fromUri('base:' . $map_settings['icon']['iconUrl'], ['absolute' => TRUE])
-        ->toString();
+    if (!empty($map_settings['icon']['iconUrl'])) {
+      $map_settings['icon']['iconUrl'] = $this->pathToAbsolute($map_settings['icon']['iconUrl']);
     }
-    if (!empty($map_settings['icon']['shadowUrl']) && !UrlHelper::isExternal($map_settings['icon']['shadowUrl']) && strpos($map_settings['icon']['shadowUrl'], '{{') === FALSE) {
-      $map_settings['icon']['shadowUrl'] = Url::fromUri('base:' . $map_settings['icon']['shadowUrl'], ['absolute' => TRUE])
-        ->toString();
+    if (!empty($map_settings['icon']['shadowUrl'])) {
+      $map_settings['icon']['shadowUrl'] = $this->pathToAbsolute($map_settings['icon']['shadowUrl']);
     }
   }
 
@@ -297,6 +295,22 @@ class LeafletService {
       'absolute' => TRUE,
       'attributes' => ['target' => 'blank'],
     ]));
+  }
+
+  /**
+   * Generate an Absolute Url from a string Path.
+   *
+   * @param string $path
+   *   The path string to generate.
+   *
+   * @return string
+   *   The absolute $path
+   */
+  public function pathToAbsolute($path) {
+    if (!UrlHelper::isExternal($path)) {
+      $path = Url::fromUri('base:', ['absolute' => TRUE])->toString() . $path;
+    }
+    return $path;
   }
 
 }

@@ -15,7 +15,7 @@ use Drupal\Component\Render\FormattableMarkup;
  *   label = @Translation("Client Location Origin"),
  *   description = @Translation("Gets the Client Location through the browser HTML5 Geolocation API."),
  *   context = {
- *   "filter",
+ *     "filter",
  *   },
  *   exposedOnly = true
  * )
@@ -55,23 +55,25 @@ class ClientLocationOriginFilter extends ManualOriginDefault {
       ];
     }
 
-    // If it IS exposed, eventually Render the Origin Summary.
-    if ($is_exposed && (isset($this->configuration['origin_summary_flag']) && $this->configuration['origin_summary_flag'])) {
-
+    // If it IS exposed load the geolocation library.
+    if ($is_exposed) {
       $form['origin']['#attached']['library'][] = 'geofield/geolocation';
 
-      $form['origin_summary'] = [
-        "#type" => 'html_tag',
-        "#tag" => 'div',
-        '#value' => $this->t('from Latitude: @lat and Longitude: @lon.', [
-          '@lat' => new FormattableMarkup('<span class="geofield-lat-summary">@lat</span>', [
-            '@lat' => $this->t('undefined'),
+      // And eventually Render the Origin Summary.
+      if (isset($this->configuration['origin_summary_flag']) && $this->configuration['origin_summary_flag']) {
+        $form['origin_summary'] = [
+          "#type" => 'html_tag',
+          "#tag" => 'div',
+          '#value' => $this->t('from Latitude: @lat and Longitude: @lon.', [
+            '@lat' => new FormattableMarkup('<span class="geofield-lat-summary">@lat</span>', [
+              '@lat' => $this->t('undefined'),
+            ]),
+            '@lon' => new FormattableMarkup('<span class="geofield-lon-summary">@lon</span>', [
+              '@lon' => $this->t('undefined'),
+            ]),
           ]),
-          '@lon' => new FormattableMarkup('<span class="geofield-lon-summary">@lon</span>', [
-            '@lon' => $this->t('undefined'),
-          ]),
-        ]),
-      ];
+        ];
+      }
     }
   }
 

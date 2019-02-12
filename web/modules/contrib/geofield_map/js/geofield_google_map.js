@@ -2,10 +2,6 @@
 
   Drupal.behaviors.geofieldGoogleMap = {
     attach: function (context, settings) {
-      Drupal.geoField = Drupal.geoField || {};
-      Drupal.geoField.maps = Drupal.geoField.maps || {};
-
-
       if (drupalSettings['geofield_google_map']) {
         $(context).find('.geofield-google-map').once('geofield-processed').each(function (index, element) {
           var mapid = $(element).attr('id');
@@ -50,10 +46,10 @@
     googleMapsLanguage: function (html_language) {
       switch (html_language) {
         case 'zh-hans':
-          html_language = 'zh-CN'
+          html_language = 'zh-CN';
           break;
         case 'zh-hant':
-          html_language = 'zh-TW'
+          html_language = 'zh-TW';
           break;
       }
       return html_language;
@@ -86,7 +82,7 @@
     // Lead Google Maps library.
     loadGoogle: function (mapid, gmap_api_key, callback) {
       var self = this;
-      var html_language = $('html').attr("lang") ? $('html').attr("lang") : 'en'
+      var html_language = $('html').attr("lang") ? $('html').attr("lang") : 'en';
 
       // Add the callback.
       self.addCallback(callback);
@@ -180,6 +176,8 @@
 
       // If the feature is a Polyline or a Polygon, add to the Map and extend the Map bounds.
       if (feature.getPath) {
+        var feature_options = JSON.parse(self.map_data[mapid].map_geometries_options) || {};
+        feature.setOptions(feature_options);
         feature.setMap(map);
         var path = feature.getPath();
         var path_bounds = new google.maps.LatLngBounds();
@@ -214,6 +212,13 @@
           map.infowindow.open(map, feature);
         }, 200);
       }
+    },
+
+    map_refresh: function (mapid) {
+      var self = this;
+      setTimeout(function() {
+        google.maps.event.trigger(self.map_data[mapid].map, 'resize');
+      }, 10);
     },
 
     // Init Geofield Google Map and its functions.
@@ -346,7 +351,6 @@
           // Define the icon_image, if set.
           var icon_image = map_settings.map_marker_and_infowindow.icon_image_path.length > 0 ? map_settings.map_marker_and_infowindow.icon_image_path : null;
 
-
           if (features.setMap) {
             self.place_feature(features, icon_image, mapid);
           }
@@ -418,20 +422,9 @@
         // At the beginning (once) ...
         google.maps.event.addListenerOnce(map, 'idle', function() {
 
-          // Fix map issue in field_groups / details & vertical tabs
-          // Show all map tiles when a map is shown in a vertical tab.
-          $('#' + mapid).closest('div.vertical-tabs').find('.vertical-tabs__menu-item a').click(function () {
-            self.map_refresh(mapid);
-          });
-          // Show all map tiles when a map is shown in a collapsible detail/ single tab.
-          $('#' + mapid).closest('.field-group-details, .field-group-tab').find('summary').click(function () {
-              self.map_refresh(mapid);
-            }
-          );
-
           // Open the Feature infowindow, if so set.
           if (self.map_data[mapid].map_marker_and_infowindow.force_open && parseInt(self.map_data[mapid].map_marker_and_infowindow.force_open) === 1) {
-            map.setCenter(features[0].getPosition());
+           // map.setCenter(features[0].getPosition());
             self.infowindow_open(mapid, features[0]);
           }
 

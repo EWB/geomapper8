@@ -2,10 +2,13 @@
 
 namespace Drupal\geofield\Plugin\GeofieldProximitySource;
 
-use Drupal\geofield\Plugin\GeofieldProximitySourceBase;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;
+use Drupal\geofield\Plugin\GeofieldProximitySourceBase;
+use Drupal\geofield\Plugin\GeofieldProximitySourceManager;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Defines 'Geofield Custom Origin' plugin.
@@ -18,12 +21,48 @@ use Drupal\Core\Ajax\ReplaceCommand;
  *   description = @Translation("A sort and field plugin that points the Origin from an existing Geofield Proximity Filter."),
  *   exposedDescription = @Translation("The origin is fixed from an existing Geofield Proximity Filter."),
  *   context = {
- *   "sort",
- *   "field",
+ *     "sort",
+ *     "field",
  *   }
  * )
  */
-class OriginFromProximityFilter extends GeofieldProximitySourceBase {
+class OriginFromProximityFilter extends GeofieldProximitySourceBase implements ContainerFactoryPluginInterface {
+
+  /**
+   * The geofield proximity manager.
+   *
+   * @var \Drupal\geofield\Plugin\GeofieldProximitySourceManager
+   */
+  protected $proximitySourceManager;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('plugin.manager.geofield_proximity_source')
+    );
+  }
+
+  /**
+   * Constructs a GeocodeOrigin object.
+   *
+   * @param array $configuration
+   *   A configuration array containing information about the plugin instance.
+   * @param string $plugin_id
+   *   The plugin_id for the plugin instance.
+   * @param mixed $plugin_definition
+   *   The plugin implementation definition.
+   * @param \Drupal\geofield\Plugin\GeofieldProximitySourceManager $proximitySourceManager
+   *   The Geofield Proximity Source manager service.
+   */
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, GeofieldProximitySourceManager $proximitySourceManager) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+    $this->proximitySourceManager = $proximitySourceManager;
+  }
 
   /**
    * Returns the list of available proximity filters.
@@ -48,7 +87,6 @@ class OriginFromProximityFilter extends GeofieldProximitySourceBase {
    * {@inheritdoc}
    */
   public function buildOptionsForm(array &$form, FormStateInterface $form_state, array $options_parents, $is_exposed = FALSE) {
-    $description = $is_exposed ? $this->pluginDefinition['exposedDescription'] : $this->pluginDefinition['description'];
 
     $user_input = $form_state->getUserInput();
     $proximity_filters_sources = $this->getAvailableProximityFilters();
@@ -57,7 +95,6 @@ class OriginFromProximityFilter extends GeofieldProximitySourceBase {
 
     if (!empty($proximity_filters_sources)) {
       $form['source_proximity_filter'] = [
-        '#prefix' => '<div class="description">' . $description . '</div>',
         '#type' => 'select',
         '#title' => t('Source Proximity Filter'),
         '#description' => t('Select the Geofield Proximity filter to use as the starting point for calculating proximity.'),
@@ -123,11 +160,23 @@ class OriginFromProximityFilter extends GeofieldProximitySourceBase {
       && is_a($this->viewHandler->view->filter[$this->viewHandler->options['source_configuration']['source_proximity_filter']], '\Drupal\geofield\Plugin\views\filter\GeofieldProximityFilter')
       && $source_proximity_filter = $this->viewHandler->options['source_configuration']['source_proximity_filter']
     ) {
+      /** @var \Drupal\geofield\Plugin\views\filter\GeofieldProximityFilter $geofield_proximity_filter */
       $geofield_proximity_filter = $this->viewHandler->view->filter[$source_proximity_filter];
-      $origin = [
-        'lat' => $geofield_proximity_filter->options['source_configuration']['origin']['lat'],
-        'lon' => $geofield_proximity_filter->options['source_configuration']['origin']['lon'],
-      ];
+
+      $source_plugin_id = $geofield_proximity_filter->options['source'];
+      $source_plugin_configuration = $geofield_proximity_filter->options['source_configuration'];
+
+      try {
+
+        /** @var \Drupal\geofield\Plugin\GeofieldProximitySourceInterface $source_plugin */
+        $source_plugin = $this->proximitySourceManager->createInstance($source_plugin_id, $source_plugin_configuration);
+        $source_plugin->setViewHandler($geofield_proximity_filter);
+
+        $origin = $source_plugin->getOrigin();
+      }
+      catch (\Exception $e) {
+        watchdog_exception('geofield', $e);
+      }
     }
     return $origin;
   }
