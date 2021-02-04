@@ -63,7 +63,7 @@ use Drupal\Core\Access\AccessResult;
  *
  * @see https://github.com/json-api/json-api/pull/1268
  * @see https://github.com/json-api/json-api/pull/1311
- * @see https://www.drupal.org/project/jsonapi/issues/2955020
+ * @see https://www.drupal.org/project/drupal/issues/2955020
  *
  * By implementing revision support as a profile, the JSON:API module should be
  * maximally compatible with other systems.
@@ -84,7 +84,7 @@ use Drupal\Core\Access\AccessResult;
  *              version-identifier
  *                    __|__
  *                   /     \
- * ?resource_version=foo:bar
+ * ?resourceVersion=foo:bar
  *                   \_/ \_/
  *                    |   |
  *    version-negotiator  |
@@ -105,19 +105,19 @@ use Drupal\Core\Access\AccessResult;
  * that has a "Published" revision and a subsequent "Draft" revision.
  *
  * Using JSON:API, one could request the "Published" node by requesting
- * `/jsonapi/node/page/{{uuid}}?resource_version=rel:latest-version`.
+ * `/jsonapi/node/page/{{uuid}}?resourceVersion=rel:latest-version`.
  *
  * To preview an entity that is still a work-in-progress (i.e. the "Draft"
  * revision) one could request
- * `/jsonapi/node/page/{{uuid}}?resource_version=rel:working-copy`.
+ * `/jsonapi/node/page/{{uuid}}?resourceVersion=rel:working-copy`.
  *
  * To request a specific revision ID, one can request
- * `/jsonapi/node/page/{{uuid}}?resource_version=id:{{revision_id}}`.
+ * `/jsonapi/node/page/{{uuid}}?resourceVersion=id:{{revision_id}}`.
  *
  * It is not yet possible to request a collection of revisions. This is still
  * under development in issue [#3009588].
  *
- * @see https://www.drupal.org/project/jsonapi/issues/3009588.
+ * @see https://www.drupal.org/project/drupal/issues/3009588.
  * @see https://tools.ietf.org/html/rfc5829
  * @see https://www.drupal.org/docs/8/modules/jsonapi/revisions
  *

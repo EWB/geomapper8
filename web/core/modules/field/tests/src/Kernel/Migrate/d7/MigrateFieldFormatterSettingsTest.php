@@ -45,7 +45,7 @@ class MigrateFieldFormatterSettingsTest extends MigrateDrupal7TestBase {
    */
   protected function assertEntity($id) {
     $display = EntityViewDisplay::load($id);
-    $this->assertTrue($display instanceof EntityViewDisplayInterface);
+    $this->assertInstanceOf(EntityViewDisplayInterface::class, $display);
   }
 
   /**
@@ -64,7 +64,7 @@ class MigrateFieldFormatterSettingsTest extends MigrateDrupal7TestBase {
    */
   protected function assertComponent($display_id, $component_id, $type, $label, $weight) {
     $component = EntityViewDisplay::load($display_id)->getComponent($component_id);
-    $this->assertTrue(is_array($component));
+    $this->assertIsArray($component);
     $this->assertIdentical($type, $component['type']);
     $this->assertIdentical($label, $component['label']);
     $this->assertIdentical($weight, $component['weight']);
@@ -80,7 +80,7 @@ class MigrateFieldFormatterSettingsTest extends MigrateDrupal7TestBase {
    */
   protected function assertComponentNotExists($display_id, $component_id) {
     $component = EntityViewDisplay::load($display_id)->getComponent($component_id);
-    $this->assertTrue(is_null($component));
+    $this->assertNull($component);
   }
 
   /**
@@ -115,6 +115,8 @@ class MigrateFieldFormatterSettingsTest extends MigrateDrupal7TestBase {
     $this->assertComponent('node.article.default', 'field_text_long_plain', 'basic_string', 'above', 14);
     $this->assertComponent('node.article.default', 'field_text_long_filtered', 'text_default', 'above', 15);
     $this->assertComponent('node.article.default', 'field_text_sum_filtered', 'text_default', 'above', 18);
+    $this->assertComponent('node.article.default', 'field_reference', 'entity_reference_label', 'above', 20);
+    $this->assertComponent('node.article.default', 'field_reference_2', 'entity_reference_entity_view', 'above', 21);
 
     $this->assertEntity('node.article.teaser');
     $this->assertComponent('node.article.teaser', 'body', 'text_summary_or_trimmed', 'hidden', 0);
@@ -126,6 +128,8 @@ class MigrateFieldFormatterSettingsTest extends MigrateDrupal7TestBase {
 
     $this->assertEntity('node.blog.teaser');
     $this->assertComponent('node.blog.teaser', 'body', 'text_summary_or_trimmed', 'hidden', 0);
+    $this->assertComponent('node.blog.default', 'field_termplain', 'entity_reference_label', 'above', 13);
+    $this->assertComponent('node.blog.default', 'field_termrss', 'entity_reference_label', 'above', 14);
 
     $this->assertEntity('node.book.default');
     $this->assertComponent('node.book.default', 'body', 'text_default', 'hidden', 0);

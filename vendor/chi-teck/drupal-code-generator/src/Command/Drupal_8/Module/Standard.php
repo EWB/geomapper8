@@ -44,7 +44,7 @@ class Standard extends BaseGenerator {
       ->path($prefix . '.module')
       ->template('d8/module.twig');
 
-    $class_prefix = Utils::camelize($vars['name']);
+    $class_prefix = Utils::camelize($vars['machine_name']);
 
     // Additional files.
     $option_questions['install_file'] = new ConfirmationQuestion('Would you like to create install file?', TRUE);
@@ -152,6 +152,18 @@ class Standard extends BaseGenerator {
         ->path($prefix . '.routing.yml')
         ->template('d8/form/routing.twig')
         ->vars($routing_vars + $vars)
+        ->action('append');
+
+      $link_vars = [
+        'route_name' => $routing_vars['route_name'],
+        'link_title' => $vars['name'],
+        'link_description' => 'Configure ' . $vars['name'] . '.',
+        'link_parent' => 'system.admin_config_system',
+      ];
+      $this->addFile()
+        ->path($prefix . '.links.menu.yml')
+        ->template('d8/form/links.menu.twig')
+        ->vars($link_vars)
         ->action('append');
     }
 

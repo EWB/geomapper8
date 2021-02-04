@@ -24,7 +24,7 @@ use Drupal\jsonapi\ResourceType\ResourceType;
  * @internal JSON:API maintains no PHP API since its API is the HTTP API. This
  *   class may change at any time and this will break any dependencies on it.
  *
- * @see https://www.drupal.org/project/jsonapi/issues/3032787
+ * @see https://www.drupal.org/project/drupal/issues/3032787
  * @see jsonapi.api.php
  */
 class IncludeResolver {
@@ -176,11 +176,17 @@ class IncludeResolver {
     $exploded_paths = array_map(function ($include_path) {
       return array_map('trim', explode('.', $include_path));
     }, $include_paths);
-    $resolved_paths = [];
+    $resolved_paths_per_resource_type = [];
     /* @var \Drupal\jsonapi\JsonApiResource\ResourceIdentifierInterface $resource_object */
     foreach ($data as $resource_object) {
-      $resolved_paths = array_merge($resolved_paths, static::resolveInternalIncludePaths($resource_object->getResourceType(), $exploded_paths));
+      $resource_type = $resource_object->getResourceType();
+      $resource_type_name = $resource_type->getTypeName();
+      if (isset($resolved_paths_per_resource_type[$resource_type_name])) {
+        continue;
+      }
+      $resolved_paths_per_resource_type[$resource_type_name] = static::resolveInternalIncludePaths($resource_type, $exploded_paths);
     }
+    $resolved_paths = array_reduce($resolved_paths_per_resource_type, 'array_merge', []);
     return static::buildTree($resolved_paths);
   }
 

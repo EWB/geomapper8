@@ -1,7 +1,8 @@
 ``reduce``
-=========
+==========
 
 .. versionadded:: 1.41
+
     The ``reduce`` filter was added in Twig 1.41.
 
 The ``reduce`` filter iteratively reduces a sequence or a mapping to a single
@@ -28,6 +29,5 @@ Note that the arrow function has access to the current context.
 Arguments
 ---------
 
-* ``array``: The sequence or mapping
 * ``arrow``: The arrow function
 * ``initial``: The initial value

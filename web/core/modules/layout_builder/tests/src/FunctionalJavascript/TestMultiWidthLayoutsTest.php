@@ -20,10 +20,14 @@ class TestMultiWidthLayoutsTest extends WebDriverTestBase {
 
   public static $modules = [
     'layout_builder',
-    'layout_builder_test_css_transitions',
     'block',
     'node',
   ];
+
+  /**
+   * {@inheritdoc}
+   */
+  protected $defaultTheme = 'stark';
 
   /**
    * {@inheritdoc}
@@ -60,8 +64,8 @@ class TestMultiWidthLayoutsTest extends WebDriverTestBase {
     $width_options = [
       [
         'label' => 'Two column',
-        'widths' => [
-          '50-50',
+        'default_width' => '50-50',
+        'additional_widths' => [
           '33-67',
           '67-33',
           '25-75',
@@ -71,9 +75,9 @@ class TestMultiWidthLayoutsTest extends WebDriverTestBase {
       ],
       [
         'label' => 'Three column',
-        'widths' => [
+        'default_width' => '33-34-33',
+        'additional_widths' => [
           '25-50-25',
-          '33-34-33',
           '25-25-50',
           '50-25-25',
         ],
@@ -81,44 +85,29 @@ class TestMultiWidthLayoutsTest extends WebDriverTestBase {
       ],
     ];
     foreach ($width_options as $width_option) {
-      $width = array_shift($width_option['widths']);
-      $assert_session->linkExists('Add Section');
-      $page->clickLink('Add Section');
+      $width = $width_option['default_width'];
+      $assert_session->linkExists('Add section');
+      $page->clickLink('Add section');
       $this->assertNotEmpty($assert_session->waitForElementVisible('css', "#drupal-off-canvas a:contains(\"{$width_option['label']}\")"));
       $page->clickLink($width_option['label']);
       $this->assertNotEmpty($assert_session->waitForElementVisible('css', '#drupal-off-canvas input[type="submit"][value="Add section"]'));
       $page->pressButton("Add section");
       $this->assertWidthClassApplied($width_option['class'] . $width);
-      foreach ($width_option['widths'] as $width) {
+      foreach ($width_option['additional_widths'] as $width) {
         $width_class = $width_option['class'] . $width;
-        $assert_session->linkExists('Configure section 1');
-        $page->clickLink('Configure section 1');
+        $assert_session->linkExists('Configure Section 1');
+        $page->clickLink('Configure Section 1');
         $this->assertNotEmpty($assert_session->waitForElementVisible('css', '#drupal-off-canvas input[type="submit"][value="Update"]'));
         $page->findField('layout_settings[column_widths]')->setValue($width);
         $page->pressButton("Update");
         $this->assertWidthClassApplied($width_class);
       }
-      $assert_session->linkExists('Remove section');
-      $this->clickLink('Remove section');
+      $assert_session->linkExists('Remove Section 1');
+      $this->clickLink('Remove Section 1');
       $this->assertNotEmpty($assert_session->waitForElementVisible('css', '#drupal-off-canvas input[type="submit"][value="Remove"]'));
       $page->pressButton('Remove');
-      $this->waitForNoElement(".$width_class");
+      $assert_session->assertNoElementAfterWait('css', ".$width_class");
     }
-  }
-
-  /**
-   * Waits for an element to be removed from the page.
-   *
-   * @param string $selector
-   *   CSS selector.
-   * @param int $timeout
-   *   (optional) Timeout in milliseconds, defaults to 10000.
-   *
-   * @todo Remove in https://www.drupal.org/node/2892440.
-   */
-  protected function waitForNoElement($selector, $timeout = 10000) {
-    $condition = "(typeof jQuery !== 'undefined' && jQuery('$selector').length === 0)";
-    $this->assertJsCondition($condition, $timeout);
   }
 
   /**

@@ -14,9 +14,8 @@ use Drupal\Core\Extension\ThemeHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Markup;
 use Drupal\Core\Render\RenderContext;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\user\Entity\User;
-use Drupal\user\UserInterface;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
 
@@ -116,9 +115,16 @@ class Bootstrap {
   const PROJECT_PAGE = 'https://www.drupal.org/project/bootstrap';
 
   /**
+   * The File System service, if it exists.
+   *
+   * @var \Drupal\Core\File\FileSystemInterface|false
+   */
+  protected static $fileSystem;
+
+  /**
    * The Messenger service, if it exists.
    *
-   * @var \Drupal\Core\Messenger\MessengerInterface
+   * @var \Drupal\Core\Messenger\MessengerInterface|false
    */
   protected static $messenger;
 
@@ -622,6 +628,31 @@ class Bootstrap {
       'icon_position' => 'before',
       'icon_only' => FALSE,
     ];
+  }
+
+  /**
+   * Retrieves the File System service, if it exists.
+   *
+   * @param string $method
+   *   Optional. A specific method on the file system service to check for
+   *   its existance.
+   *
+   * @return \Drupal\Core\File\FileSystemInterface
+   *   The File System service, if it exists and if $method exists if it was
+   *   passed.
+   *
+   * @deprecated in bootstrap:8.x-3.22 and is removed from bootstrap:5.0.0.
+   *   Use the "file_system" service instead.
+   * @see https://www.drupal.org/project/bootstrap/issues/3096963
+   */
+  public static function fileSystem($method = NULL) {
+    if (!isset(static::$fileSystem)) {
+      static::$fileSystem = \Drupal::hasService('file_system') ? \Drupal::service('file_system') : FALSE;
+    }
+    if ($method) {
+      return static::$fileSystem && method_exists(static::$fileSystem, $method) ? static::$fileSystem : FALSE;
+    }
+    return static::$fileSystem;
   }
 
   /**
@@ -1234,21 +1265,27 @@ class Bootstrap {
   /**
    * Checks whether a user is an administrator.
    *
-   * @param \Drupal\user\UserInterface $user
-   *   Optional. A specific user to check. If not set, the currently logged in
-   *   user will be used.
+   * @param \Drupal\Core\Session\AccountInterface $account
+   *   Optional. A specific account to check. If not set, the currently logged
+   *   in user account will be used.
    *
    * @return bool
    *   TRUE or FALSE
    */
-  public static function isAdmin(UserInterface $user = NULL) {
+  public static function isAdmin(AccountInterface $account = NULL) {
     static $admins = [];
-    $user = $user ?: User::load(\Drupal::currentUser()->id());
-    $uid = (int) $user->id();
-    if (!isset($admins[$uid])) {
-      $admins[$uid] = $user->hasPermission('access administration pages');
+
+    // Use the currently logged in user if no account was explicitly specified.
+    if (!$account) {
+      $account = \Drupal::currentUser();
     }
-    return $admins[$uid];
+
+    $id = (int) $account->id();
+    if (!isset($admins[$id])) {
+      $admins[$id] = $account->hasPermission('access administration pages');
+    }
+
+    return $admins[$id];
   }
 
   /**
@@ -1310,6 +1347,7 @@ class Bootstrap {
    *
    * @deprecated in 8.x-3.18 and will be removed in a future release.
    *   Use \Drupal\Core\Messenger\MessengerInterface::addMessage() instead.
+   * @see https://www.drupal.org/project/bootstrap/issues/3096963
    */
   public static function message($message, $type = 'status', $repeat = FALSE) {
     if (!isset(static::$messenger)) {

@@ -23,12 +23,12 @@ class ConfigPullCommands extends DrushCommands implements SiteAliasManagerAwareI
      * @param array $options
      * @throws \Exception
      * @option safe Validate that there are no git uncommitted changes before proceeding
-     * @option label A config directory label (i.e. a key in \$config_directories array in settings.php). Defaults to 'sync'
-     * @option runner Where to run the rsync command; defaults to the local site. Can also be 'source' or 'destination'
+     * @option label A config directory label (i.e. a key in $config_directories array in settings.php).
+     * @option runner Where to run the rsync command; defaults to the local site. Can also be <info>source</info> or <info>destination</info>.
      * @usage drush config:pull @prod @stage
      *   Export config from @prod and transfer to @stage.
      * @usage drush config:pull @prod @self --label=vcs
-     *   Export config from @prod and transfer to the 'vcs' config directory of current site.
+     *   Export config from @prod and transfer to the <info>vcs</info> config directory of current site.
      * @usage drush config:pull @prod @self:../config/sync
      *   Export config to a custom directory. Relative paths are calculated from Drupal root.
      * @aliases cpull,config-pull
@@ -51,8 +51,15 @@ class ConfigPullCommands extends DrushCommands implements SiteAliasManagerAwareI
         $this->logger()->notice(dt('Starting to export configuration on :destination.', [':destination' => $destination]));
         $process = $this->processManager()->drush($sourceRecord, 'config-export', [], $export_options + $global_options);
         $process->mustRun();
-        // Trailing slash assures that we transfer files and not the containing dir.
-        $export_path = $this->getConfig()->simulate() ? '/simulated/path' : trim($process->getOutput()) . '/';
+
+        if ($this->getConfig()->simulate()) {
+            $export_path = '/simulated/path';
+        } elseif (empty(trim($process->getOutput()))) {
+            throw new \Exception(dt('The Drush config:export command did not report the path to the export directory.'));
+        } else {
+            // Trailing slash ensures that we transfer files and not the containing dir.
+            $export_path = trim($process->getOutput()) . '/';
+        }
 
         if (strpos($destination, ':') === false) {
             $destination .= ':%config-' . $options['label'];
@@ -76,7 +83,6 @@ class ConfigPullCommands extends DrushCommands implements SiteAliasManagerAwareI
         ];
         $process = $this->processManager()->drush($runner, 'core-rsync', $args, ['yes' => true, 'debug' => true], $options_double_dash);
         $process->mustRun();
-        drush_backend_set_result($destinationHostPath->getOriginal());
         return new PropertyList(['path' => $destinationHostPath->getOriginal()]);
     }
 

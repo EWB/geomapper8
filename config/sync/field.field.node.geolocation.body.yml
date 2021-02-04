@@ -1,0 +1,23 @@
+uuid: dd8913c6-d0d7-4817-beb2-2cdbaa8298d1
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.body
+    - node.type.geolocation
+  module:
+    - text
+id: node.geolocation.body
+field_name: body
+entity_type: node
+bundle: geolocation
+label: Body
+description: ''
+required: false
+translatable: true
+default_value: {  }
+default_value_callback: ''
+settings:
+  display_summary: true
+  required_summary: false
+field_type: text_with_summary

@@ -2,3 +2,6 @@ name: geomapper
 recipe: drupal8
 config:
   webroot: web
+services:
+  appserver:
+    composer_version: 1

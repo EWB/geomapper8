@@ -1,0 +1,33 @@
+uuid: 6a95b607-9c9d-4c90-8ea0-d0330b487f32
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_geolocation
+    - node.type.geolocation
+  module:
+    - geofield
+id: node.geolocation.field_geolocation
+field_name: field_geolocation
+entity_type: node
+bundle: geolocation
+label: GeoLocation
+description: ''
+required: false
+translatable: false
+default_value:
+  -
+    value: 'POINT (-75 44)'
+    geo_type: Point
+    lat: !!float 44
+    lon: !!float -75
+    left: !!float -75
+    top: !!float 44
+    right: !!float -75
+    bottom: !!float 44
+    geohash: drfdm3
+    latlon: '44,-75'
+default_value_callback: ''
+settings:
+  backend: geofield_backend_default
+field_type: geofield

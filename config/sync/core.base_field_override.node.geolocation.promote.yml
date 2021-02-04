@@ -1,0 +1,22 @@
+uuid: b16945ca-1c22-4f42-850f-7e0d17b6412e
+langcode: en
+status: true
+dependencies:
+  config:
+    - node.type.geolocation
+id: node.geolocation.promote
+field_name: promote
+entity_type: node
+bundle: geolocation
+label: 'Promoted to front page'
+description: ''
+required: false
+translatable: true
+default_value:
+  -
+    value: 0
+default_value_callback: ''
+settings:
+  on_label: 'On'
+  off_label: 'Off'
+field_type: boolean

@@ -37,6 +37,11 @@ class LibraryInfo extends PluginBase implements AlterInterface {
 
       // Alter the framework library based on currently set CDN Provider.
       $this->theme->getCdnProvider()->alterFrameworkLibrary($libraries['framework']);
+
+      // Add back deprecated library dependencies that are only available in D8.
+      if (((int) substr(\Drupal::VERSION, 0, 1)) < 9) {
+        $libraries['drupal.vertical-tabs']['dependencies'][] = 'core/matchmedia';
+      }
     }
     // Core replacements.
     elseif ($extension === 'core') {
@@ -55,11 +60,13 @@ class LibraryInfo extends PluginBase implements AlterInterface {
           unset($libraries['drupal.dialog']['js']['misc/dialog/dialog.jquery-ui.js']);
 
           // Add the Modal jQuery UI Bridge.
+          $libraries['drupal.dialog']['dependencies'][] = 'bootstrap/dialog';
           $libraries['drupal.dialog']['dependencies'][] = 'bootstrap/modal.jquery.ui.bridge';
         }
         // Otherwise, just append the modal.
         else {
           $libraries['drupal.dialog']['dependencies'][] = 'bootstrap/modal';
+          $libraries['drupal.dialog']['dependencies'][] = 'bootstrap/dialog';
         }
       }
     }

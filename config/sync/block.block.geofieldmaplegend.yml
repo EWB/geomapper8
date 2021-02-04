@@ -1,0 +1,33 @@
+uuid: 9ac75ac5-1377-4098-8be7-5ff9ecbd5630
+langcode: en
+status: true
+dependencies:
+  module:
+    - geofield_map
+    - system
+  theme:
+    - bootstrap
+id: geofieldmaplegend
+theme: bootstrap
+region: sidebar_first
+weight: 0
+provider: null
+plugin: geofield_map_legend
+settings:
+  id: geofield_map_legend
+  label: 'Geofield Map Legend'
+  provider: geofield_map
+  label_display: '0'
+  geofield_map_legend: 'map:default'
+  legend_caption: ''
+  legend_notes: ''
+  values_label: Value
+  markers_label: Marker/Icon
+  markers_image_style: null
+  markers_width: '50'
+visibility:
+  request_path:
+    id: request_path
+    pages: /map
+    negate: false
+    context_mapping: {  }

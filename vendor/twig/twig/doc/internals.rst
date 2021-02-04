@@ -1,7 +1,7 @@
 Twig Internals
 ==============
 
-Twig is very extensible and you can easily hack it. Keep in mind that you
+Twig is very extensible and you can hack it. Keep in mind that you
 should probably try to create an extension before hacking the core, as most
 features and enhancements can be handled with extensions. This chapter is also
 useful for people who want to understand how Twig works under the hood.
@@ -49,6 +49,7 @@ You can manually convert a source code into a token stream by calling the
     $stream = $twig->tokenize(new \Twig\Source($source, $identifier));
 
 .. versionadded:: 1.27
+
     ``\Twig\Source`` was introduced in version 1.27, pass the source and the
     identifier directly on previous versions.
 

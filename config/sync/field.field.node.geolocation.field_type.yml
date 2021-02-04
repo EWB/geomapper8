@@ -1,0 +1,29 @@
+uuid: ff17d2f6-8b1b-4071-954c-15af954d5e0c
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_type
+    - node.type.geolocation
+    - taxonomy.vocabulary.type
+id: node.geolocation.field_type
+field_name: field_type
+entity_type: node
+bundle: geolocation
+label: Type
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  handler: 'default:taxonomy_term'
+  handler_settings:
+    target_bundles:
+      type: type
+    sort:
+      field: name
+      direction: asc
+    auto_create: true
+    auto_create_bundle: ''
+field_type: entity_reference

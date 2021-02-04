@@ -1,0 +1,22 @@
+uuid: e0ce41cb-1612-41d2-a42e-a08f2229c63d
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_test_location
+    - node.type.page
+  module:
+    - geofield
+id: node.page.field_test_location
+field_name: field_test_location
+entity_type: node
+bundle: page
+label: 'Test Location'
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  backend: geofield_backend_default
+field_type: geofield
