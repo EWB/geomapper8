@@ -1,0 +1,11 @@
+'live':
+  host: 69.175.121.2
+  root: '/home/digita47/drupal/www.geomapper.org/docroot'
+  paths:
+    files: web/sites/default/files
+    drush-script: /home/digita47/drupal/www.geomapper.org/docroot/vendor/drush/drush/drush
+  uri: geomapper.org
+  user: digita47
+  ssh:
+    options: ''
+    tty: false
